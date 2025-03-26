@@ -11,8 +11,6 @@ using namespace std;
 #define PI 3.14159265
 #define g 1.625
 #define g0 9.81
-int WIDTH = 120;
-int HEIGHT = 30;
 
 #define SLS_X 4  
 #define SLS_Y 7  
@@ -25,6 +23,8 @@ int HEIGHT = 30;
 
 #define TIMESTEP 0.08
 
+int WIDTH = 120;
+int HEIGHT = 30;
 int LANDER_SCREEN_X = WIDTH / 2;
 int LANDER_SCREEN_Y = HEIGHT / 3;
 
@@ -47,7 +47,6 @@ enum ConsoleColors {
     WHITE = FOREGROUND_INTENSITY | FOREGROUND_RED | FOREGROUND_GREEN | FOREGROUND_BLUE
 
 };
-
 
 void gotoxy(int x, int y) {
 	COORD pos = { x, y };
@@ -363,11 +362,13 @@ public:
 		if (angle == 0) {
 			currentBlueprint.blueprint[2][2] = engine.thrustIndicator;
 		}
-		else if (angle == 90 && percent != 0) {
-			currentBlueprint.blueprint[1][4] = '>';
+		else if (angle == 90) {
+			if (percent != 0) currentBlueprint.blueprint[1][4] = '>';
+			else currentBlueprint.blueprint[1][4] = ' ';
 		}
-		else if (angle == -90 && percent != 0) {
-			currentBlueprint.blueprint[1][0] = '<';
+		else if (angle == -90) { 
+			if (percent != 0) currentBlueprint.blueprint[1][0] = '<';
+			else currentBlueprint.blueprint[1][0] = ' ';
 		}
 		else {
 			currentBlueprint.blueprint[2][2] = engine.thrustIndicator;
@@ -537,7 +538,7 @@ public:
 					int tileY = i + position.y;
 					int predictedBottom = landerBottom + landerVerticalSpeed*TIMESTEP;
 
-					if (tileY <= landerBottom || tileY <= predictedBottom - 6) {
+					if (tileY <= landerBottom - 1 || tileY <= predictedBottom - 6) {
 						return true;
 					}
 				}
@@ -841,7 +842,7 @@ public:
 			terrain.updateConsolePosition(lander);
 			lander.update(isCollided);
 
-			if (handleInput(lander)) showPauseMenu();
+			if (handleInput(lander)) showPauseMenu(lander);
 			Sleep(1);
 		}
 	}
@@ -873,7 +874,7 @@ public:
 		}
 	}
 
-	static void showPauseMenu() {
+	void showPauseMenu(Lander& lander) {
 		system("CLS");
 		gotoxy(LANDER_SCREEN_X - 8, LANDER_SCREEN_Y);
 		cout << "GAME PAUSED";
@@ -889,7 +890,10 @@ public:
 				int key = _getch();
 				switch (key) {
 				case 49: system("CLS"); return;
-				case 50: showMainMenu(); return;
+				case 50: 
+					showMainMenu();
+					lander = Lander(posX, posY, velX, velY, fuelMass);
+					return;
 				case 51: exit(0);
 				}
 			}
@@ -902,7 +906,7 @@ vector<GameLevel> GameLevel::levels = {
 	GameLevel("EASY", TERRAIN_WIDTH / 2, MAX_MAP_HEIGHT - 50, 0, 0, 4000),
 	GameLevel("MEDIUM", TERRAIN_WIDTH / 4, MAX_MAP_HEIGHT - 100, 3, -4, 800),
 	GameLevel("HARD", TERRAIN_WIDTH / 1.5, MAX_MAP_HEIGHT - 760, -10, -20, 300),
-	GameLevel("NEIL ARMSTRONG", TERRAIN_WIDTH / 1.5, MAX_MAP_HEIGHT - 20, -60, -10, 300)
+	GameLevel("NEIL ARMSTRONG", TERRAIN_WIDTH / 1.4, MAX_MAP_HEIGHT - 20, -70, -10, 300)
 };
 
 int main() {
