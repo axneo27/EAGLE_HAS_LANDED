@@ -714,52 +714,65 @@ public:
 	GameLevel(string dif, int x, int y, int vx, int vy, double fm) : difficulty(dif), posX(x), posY(y), velX(vx), velY(vy), fuelMass(fm) {}
 	GameLevel() : GameLevel("EASY", TERRAIN_WIDTH / 2, MAX_MAP_HEIGHT - 20, 0, 0, 1000) {}
 
-	static GameLevel showMainMenu() {
-		system("CLS");
-		gotoxy(LANDER_SCREEN_X - 5, LANDER_SCREEN_Y);
+	static void printLevelsItems() {
+		gotoxy(LANDER_SCREEN_X - 5, LANDER_SCREEN_Y - 5);
 		cout << "SELECT LEVEL" << endl;
 		for (int i = 0; i < GameLevel::levels.size(); i++) {
-			gotoxy(LANDER_SCREEN_X - 4, LANDER_SCREEN_Y + i + 2);
+			gotoxy(LANDER_SCREEN_X - 4, LANDER_SCREEN_Y + i + 2 - 5);
 			cout << GameLevel::levels[i].difficulty << " - " << i + 1 << endl;
 		}
-		gotoxy(LANDER_SCREEN_X - 4, LANDER_SCREEN_Y + GameLevel::levels.size() + 3);
-		cout << "EXIT - 5" << endl;
+		gotoxy(LANDER_SCREEN_X - 4, LANDER_SCREEN_Y + GameLevel::levels.size() + 3 - 5);
+		cout << "EXIT - 0" << endl;
+	}
+
+	static GameLevel showMainMenu() {
+		system("CLS");
+		printLevelsItems();
 		while (true) {
 			if (_kbhit()) {
 				int key = _getch();
-				switch (key) {
-				case 49:
-					gotoxy(LANDER_SCREEN_X - 11, LANDER_SCREEN_Y + GameLevel::levels.size() + 5);
-					cout << "Difficuly " << GameLevel::levels[0].difficulty << " was chosen." << endl;
-					Sleep(1500);
-					system("CLS");
-					return GameLevel::levels[0];
-				case 50:
-					gotoxy(LANDER_SCREEN_X - 11, LANDER_SCREEN_Y + GameLevel::levels.size() + 5);
-					cout << "Difficuly " << GameLevel::levels[1].difficulty << " was chosen." << endl;
-					Sleep(1500);
-					system("CLS");
-					return GameLevel::levels[1];
-				case 51:
-					gotoxy(LANDER_SCREEN_X - 11, LANDER_SCREEN_Y + GameLevel::levels.size() + 5);
-					cout << "Difficuly " << GameLevel::levels[2].difficulty << " was chosen." << endl;
-					Sleep(1500);
-					system("CLS");
-					return GameLevel::levels[2];
-				case 52:
-					gotoxy(LANDER_SCREEN_X - 11, LANDER_SCREEN_Y + GameLevel::levels.size() + 5);
-					cout << "Difficuly " << GameLevel::levels[3].difficulty << " was chosen." << endl;
-					Sleep(1500);
-					system("CLS");
-					return GameLevel::levels[3];
-				case 53:
-					exit(0);
-				default:
-					break;
+				for (int i = 0; i < GameLevel::levels.size(); i++) {
+					if (key - 48 == i + 1) {
+						system("CLS");
+						showLevelTrajectory(GameLevel::levels[i], LANDER_SCREEN_X - 25, LANDER_SCREEN_Y);
+						showLevelInfo(GameLevel::levels[i], LANDER_SCREEN_X - 25, LANDER_SCREEN_Y + 13);
+						gotoxy(LANDER_SCREEN_X - 25, LANDER_SCREEN_Y + 15);
+						cout << GameLevel::levels[i].difficulty << " was chosen. Press K to continue or ESC to forfeit." << endl;
+						bool forfeited = false;
+						while (true) {
+							if (forfeited) break;
+							if (_kbhit()) {
+								int key = _getch();
+								switch (key) {
+								case 75: case 107:
+									system("CLS");
+									return GameLevel::levels[i];
+								case 27:
+									forfeited = true;
+								}
+							}
+						}
+						system("CLS");
+						printLevelsItems();
+					}
 				}
+				if (key == 48) exit(0);
 			}
 			Sleep(50);
 		}
+	}
+
+	friend static void showLevelInfo(GameLevel& level, int x, int y) {
+		gotoxy(x, y);
+		cout << "Fuel: " << int((level.fuelMass / 8200) * 100) << " %" << "; Altitude: " << MAX_MAP_HEIGHT - level.posY - 3 << " m; ";
+		cout << "Vx: " << level.velX << " m/s; " << "Vy: " << level.velY << " m/s." << endl;
+	}
+
+	friend static void showLevelTrajectory(GameLevel& level, int x, int y) {
+		Lander lander(level.posX, level.posY, level.velX, level.velY, level.fuelMass);
+		TrajectoryDisplay trajectory(x, y); 
+		trajectory.update(lander);
+		trajectory.print();
 	}
 
 	bool handleInput(Lander& lander) {
@@ -809,8 +822,8 @@ public:
 		terrain.updateConsolePosition(lander);
 
 		while (true) {
-			if (lander.position.x <= 100 || lander.position.x >= TERRAIN_WIDTH - 400 ||
-				lander.position.y < 100) {
+			if (lander.position.x <= 1 || lander.position.x >= TERRAIN_WIDTH - 1 ||
+				lander.position.y <= 1) {
 				gotoxy(LANDER_SCREEN_X, LANDER_SCREEN_Y - 10);
 				cout << "You went out of the map bounds" << endl;
 				Sleep(2000);
@@ -903,9 +916,9 @@ public:
 };
 
 vector<GameLevel> GameLevel::levels = {
-	GameLevel("EASY", TERRAIN_WIDTH / 2, MAX_MAP_HEIGHT - 50, 0, 0, 4000),
-	GameLevel("MEDIUM", TERRAIN_WIDTH / 4, MAX_MAP_HEIGHT - 100, 3, -4, 800),
-	GameLevel("HARD", TERRAIN_WIDTH / 1.5, MAX_MAP_HEIGHT - 760, -10, -20, 300),
+	GameLevel("EASY", TERRAIN_WIDTH / 2, MAX_MAP_HEIGHT - 200, 1, 0, 4000),
+	GameLevel("MEDIUM", TERRAIN_WIDTH / 4, MAX_MAP_HEIGHT - 500, 15, -20, 1000),
+	GameLevel("HARD", TERRAIN_WIDTH / 1.5, MAX_MAP_HEIGHT - 760, -10, -20, 300),  
 	GameLevel("NEIL ARMSTRONG", TERRAIN_WIDTH / 1.4, MAX_MAP_HEIGHT - 20, -70, -10, 300)
 };
 
