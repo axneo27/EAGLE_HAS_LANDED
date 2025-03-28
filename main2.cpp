@@ -863,8 +863,8 @@ public:
 
 		printCreateLevel(createdLevel);
 		while (true) {
+			showcursor(true);
 			if (_kbhit()) {
-				showcursor(true);
 				int key = _getch();
 				switch (key) {
 				case 27: system("CLS"); showcursor(false); return;
@@ -1133,7 +1133,7 @@ public:
 		this->posX = newPosX;
 	}
 	void changeAltitude(int newAltitude) {
-		if (newAltitude <= 8 || newAltitude >= MAX_MAP_HEIGHT - 8);
+		if (newAltitude <= 8 || newAltitude >= MAX_MAP_HEIGHT - 8) return;
 		this->posY = MAX_MAP_HEIGHT - newAltitude;
 	}
 	void changeVelX(int newVelX) {
