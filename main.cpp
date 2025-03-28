@@ -29,22 +29,22 @@ int LANDER_SCREEN_X = WIDTH / 2;
 int LANDER_SCREEN_Y = HEIGHT / 3;
 
 enum ConsoleColors {
-    BLACK = 0,
-    DARK_BLUE = FOREGROUND_BLUE,
-    DARK_GREEN = FOREGROUND_GREEN,
-    DARK_CYAN = FOREGROUND_GREEN | FOREGROUND_BLUE,
-    DARK_RED = FOREGROUND_RED,
-    DARK_MAGENTA = FOREGROUND_RED | FOREGROUND_BLUE,
-    DARK_YELLOW = FOREGROUND_RED | FOREGROUND_GREEN,
-    GRAY = FOREGROUND_RED | FOREGROUND_GREEN | FOREGROUND_BLUE,
-    DARK_GRAY = FOREGROUND_INTENSITY,
-    BLUE = FOREGROUND_INTENSITY | FOREGROUND_BLUE,
-    GREEN = FOREGROUND_INTENSITY | FOREGROUND_GREEN,
-    CYAN = FOREGROUND_INTENSITY | FOREGROUND_GREEN | FOREGROUND_BLUE,
-    RED = FOREGROUND_INTENSITY | FOREGROUND_RED,
-    MAGENTA = FOREGROUND_INTENSITY | FOREGROUND_RED | FOREGROUND_BLUE,
-    YELLOW = FOREGROUND_INTENSITY | FOREGROUND_RED | FOREGROUND_GREEN,
-    WHITE = FOREGROUND_INTENSITY | FOREGROUND_RED | FOREGROUND_GREEN | FOREGROUND_BLUE
+	BLACK = 0,
+	DARK_BLUE = FOREGROUND_BLUE,
+	DARK_GREEN = FOREGROUND_GREEN,
+	DARK_CYAN = FOREGROUND_GREEN | FOREGROUND_BLUE,
+	DARK_RED = FOREGROUND_RED,
+	DARK_MAGENTA = FOREGROUND_RED | FOREGROUND_BLUE,
+	DARK_YELLOW = FOREGROUND_RED | FOREGROUND_GREEN,
+	GRAY = FOREGROUND_RED | FOREGROUND_GREEN | FOREGROUND_BLUE,
+	DARK_GRAY = FOREGROUND_INTENSITY,
+	BLUE = FOREGROUND_INTENSITY | FOREGROUND_BLUE,
+	GREEN = FOREGROUND_INTENSITY | FOREGROUND_GREEN,
+	CYAN = FOREGROUND_INTENSITY | FOREGROUND_GREEN | FOREGROUND_BLUE,
+	RED = FOREGROUND_INTENSITY | FOREGROUND_RED,
+	MAGENTA = FOREGROUND_INTENSITY | FOREGROUND_RED | FOREGROUND_BLUE,
+	YELLOW = FOREGROUND_INTENSITY | FOREGROUND_RED | FOREGROUND_GREEN,
+	WHITE = FOREGROUND_INTENSITY | FOREGROUND_RED | FOREGROUND_GREEN | FOREGROUND_BLUE
 
 };
 
@@ -137,7 +137,8 @@ public:
 							SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), RED);
 							cout << blueprint[i][j];
 							SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), WHITE);
-						} else {
+						}
+						else {
 							cout << blueprint[i][j];
 						}
 						break;
@@ -225,7 +226,7 @@ public:
 		}
 		percentThrust = percent;
 		currentThrust = maxThrust * percentThrust / 100;
-		
+
 		changethrustIndicator(percentThrust);
 
 		changeIsp(percentThrust);
@@ -366,7 +367,7 @@ public:
 			if (percent != 0) currentBlueprint.blueprint[1][4] = '>';
 			else currentBlueprint.blueprint[1][4] = ' ';
 		}
-		else if (angle == -90) { 
+		else if (angle == -90) {
 			if (percent != 0) currentBlueprint.blueprint[1][0] = '<';
 			else currentBlueprint.blueprint[1][0] = ' ';
 		}
@@ -381,15 +382,15 @@ public:
 				landed = true;
 			}
 			else {
-				crashed = true;  
+				crashed = true;
 			}
 			accX = 0;
 			accY = 0;
 			velocity.x = 0;
 			velocity.y = 0;
-		}	
+		}
 		else {
-			
+
 			velocity.x += accX * deltaTime;
 			velocity.y += accY * deltaTime;
 			position.x += velocity.x * deltaTime;
@@ -459,7 +460,7 @@ public:
 
 	Point getVelocity() const {
 		return velocity;
-	}	
+	}
 
 	double getAltitude() const {
 		return MAX_MAP_HEIGHT - int(position.y) - currentBlueprint.height - TERRAIN_HEIGHT;
@@ -503,18 +504,18 @@ public:
 
 		const int BASE_HEIGHT = TERRAIN_HEIGHT - 3;
 		const double WAVE_FREQUENCY = 0.08;
-		const double CRATER_CHANCE = 0.05;  
+		const double CRATER_CHANCE = 0.05;
 
 		for (int x = 0; x < TERRAIN_WIDTH; x++) {
 			double sineValue = sin(x * WAVE_FREQUENCY);
 			int height = BASE_HEIGHT + static_cast<int>(sineValue * 3);
 
-			int randomVariation = (rand() % 3 - 1); 
+			int randomVariation = (rand() % 3 - 1);
 			height += randomVariation;
 
 			if (height < 0) height = 0;
 			if (height >= TERRAIN_HEIGHT) height = TERRAIN_HEIGHT - 1;
-			
+
 
 			for (int y = height; y < TERRAIN_HEIGHT; y++) {
 				tiles[y][x] = MOON_GROUND;
@@ -523,9 +524,9 @@ public:
 	}
 
 	bool checkCollision(Lander& lander) {
-		
+
 		int landerLeft = lander.position.x;
-		int landerRight = lander.position.x + lander.currentBlueprint.width; 
+		int landerRight = lander.position.x + lander.currentBlueprint.width;
 		int landerBottom = int(lander.position.y) + lander.currentBlueprint.height;
 
 		int landerVerticalSpeed = lander.getVelocity().y;
@@ -533,10 +534,10 @@ public:
 		for (int i = 0; i < TERRAIN_HEIGHT; i++) {
 
 			for (int j = landerLeft; j <= landerRight; j++) {
-				if (tiles[i][j] == MOON_GROUND) { 
+				if (tiles[i][j] == MOON_GROUND) {
 					int tileX = j;
 					int tileY = i + position.y;
-					int predictedBottom = landerBottom + landerVerticalSpeed*TIMESTEP;
+					int predictedBottom = landerBottom + landerVerticalSpeed * TIMESTEP;
 
 					if (tileY <= landerBottom - 1 || tileY <= predictedBottom - 6) {
 						return true;
@@ -551,14 +552,14 @@ public:
 		for (int i = 0; i < TERRAIN_HEIGHT; i++) {
 			if (!isValidY(i + consolePosition.y)) continue;
 			gotoxy(0, i + consolePosition.y);
-			for (int j = int(- relativePosition.x); j < int(-relativePosition.x) + WIDTH; j++) {
+			for (int j = int(-relativePosition.x); j < int(-relativePosition.x) + WIDTH; j++) {
 				cout << tiles[i][j];
 			}
 		}
 	}
 
 	void clear() {
-		for (int i = 0; i < TERRAIN_HEIGHT; i++) { 
+		for (int i = 0; i < TERRAIN_HEIGHT; i++) {
 			if (!isValidY(i + consolePosition.y)) continue;
 			gotoxy(0, i + consolePosition.y);
 			for (int j = int(-relativePosition.x); j < int(-relativePosition.x) + WIDTH; j++) {
@@ -572,7 +573,7 @@ public:
 			return;
 		}
 		clear();
-		relativePosition.x = -lander.position.x; 
+		relativePosition.x = -lander.position.x;
 		relativePosition.y = this->position.y - lander.position.y;
 
 		consolePosition.x = LANDER_SCREEN_X + relativePosition.x;
@@ -619,7 +620,7 @@ public:
 		clearGraph();
 
 		double scaleX = lander.position.x / TERRAIN_WIDTH;
-		double scaleY = lander.position.y / MAX_MAP_HEIGHT; 
+		double scaleY = lander.position.y / MAX_MAP_HEIGHT;
 
 		int displayX = 1 + int(scaleX * (width - 2));
 		int displayY = 1 + int(scaleY * (height - 2));
@@ -628,7 +629,7 @@ public:
 
 		Point landerVel = lander.getVelocity();
 		double velX = landerVel.x;
-		double velY = landerVel.y; 
+		double velY = landerVel.y;
 
 		for (double t = 0; t < 100.0; t += timeStep) {
 			double projWorldX = lander.position.x + velX * t;
@@ -685,13 +686,13 @@ void setWH() {
 			system("CLS");
 			return;
 		}
-			//75 107
+		//75 107
 		if (_kbhit()) {
 			int key = _getch();
 			switch (key) {
-			case 75: case 107: 
+			case 75: case 107:
 				start = true;// K
-				break;        
+				break;
 			default:
 				break;
 			}
@@ -770,7 +771,7 @@ public:
 
 	friend static void showLevelTrajectory(GameLevel& level, int x, int y) {
 		Lander lander(level.posX, level.posY, level.velX, level.velY, level.fuelMass);
-		TrajectoryDisplay trajectory(x, y); 
+		TrajectoryDisplay trajectory(x, y);
 		trajectory.update(lander);
 		trajectory.print();
 	}
@@ -827,7 +828,7 @@ public:
 				Sleep(2000);
 				return OUT_OF_BOUNDS;
 			}
-			if (lander.crashed) { 
+			if (lander.crashed) {
 				gotoxy(LANDER_SCREEN_X, LANDER_SCREEN_Y - 5);
 				cout << "CRASH!" << endl;
 				Sleep(2000);
@@ -839,7 +840,7 @@ public:
 				Sleep(2000);
 				return LANDED;
 			}
-
+			handleInput(lander);
 			bool isCollided = terrain.checkCollision(lander);
 			lander.clearData();
 			lander.showData(isCollided);
@@ -887,7 +888,7 @@ public:
 vector<GameLevel> GameLevel::levels = {
 	GameLevel("EASY", TERRAIN_WIDTH / 2, MAX_MAP_HEIGHT - 200, 1, 0, 4000),
 	GameLevel("MEDIUM", TERRAIN_WIDTH / 4, MAX_MAP_HEIGHT - 500, 15, -20, 1000),
-	GameLevel("HARD", TERRAIN_WIDTH / 1.5, MAX_MAP_HEIGHT - 760, -10, -20, 300),  
+	GameLevel("HARD", TERRAIN_WIDTH / 1.5, MAX_MAP_HEIGHT - 760, -10, -20, 300),
 	GameLevel("NEIL ARMSTRONG", TERRAIN_WIDTH / 1.4, MAX_MAP_HEIGHT - 20, -70, -10, 300)
 };
 
