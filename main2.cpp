@@ -537,9 +537,9 @@ public:
 				if (tiles[i][j] == MOON_GROUND) { 
 					int tileX = j;
 					int tileY = position.y + i;
-					int predictedBottom = landerBottom + landerVerticalSpeed*TIMESTEP*1.8;
+					int predictedBottom = landerBottom + landerVerticalSpeed*TIMESTEP*8.8;
 
-					if (tileX >= landerLeft && tileX <= landerRight && (tileY <= landerBottom - 1 || tileY <= predictedBottom)) { //asd
+					if (tileX >= landerLeft && tileX <= landerRight && (tileY <= landerBottom - 2 || tileY <= predictedBottom - 1)) { //asd
 						return true;
 					}
 
@@ -1173,7 +1173,7 @@ vector<GameLevel> GameLevel::levels = {
 	GameLevel("NEIL_ARMSTRONG", TERRAIN_WIDTH / 1.4, MAX_MAP_HEIGHT - 20, -70, -10, 300)
 };
 
-int main() {
+int main() { 
 	srand(time(NULL));
 	showcursor(false); 
 	vector<GameLevel> levels = readLevelsFromFile("AdditionalLevels.txt");
