@@ -23,7 +23,7 @@ using namespace std;
 #define TERRAIN_HEIGHT 3
 #define MAX_MAP_HEIGHT 2000
 
-#define TIMESTEP 0.06
+#define TIMESTEP 0.08
 
 int WIDTH = 120;
 int HEIGHT = 30;
