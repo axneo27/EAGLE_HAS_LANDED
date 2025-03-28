@@ -470,9 +470,7 @@ public:
 	void showData(bool isCollided) const {
 		if (WIDTH == 209 && HEIGHT == 51) gotoxy(147, 14);
 		else gotoxy(LANDER_SCREEN_X - 100, 0);
-		cout << "Vel X: " << int(velocity.x) << "; Vel Y: " << int(velocity.y) << "; Thrust: " << engine.percentThrust << "%" << "; Fuel: " << int((fuelMass / startFuelMass) * 100) << "%" << "; Altitude: " << int(getAltitude()) << " m; " << endl;
-		/*gotoxy(0, 1);
-		cout << "X: " << position.x << "; Y: " << position.y << endl;*/
+		cout << "Vel X: " << int(velocity.x) << "; Vel Y: " << -int(velocity.y) << "; Thrust: " << engine.percentThrust << "%" << "; Fuel: " << int((fuelMass / startFuelMass) * 100) << "%" << "; Altitude: " << int(getAltitude()) << " m; " << endl;
 	}
 
 	void clearData() const {
@@ -529,20 +527,22 @@ public:
 		int landerLeft = lander.position.x;
 		int landerRight = lander.position.x + lander.currentBlueprint.width; 
 		int landerBottom = int(lander.position.y) + lander.currentBlueprint.height;
+		int landerTop = lander.position.y;
 
 		int landerVerticalSpeed = lander.getVelocity().y;
 
 		for (int i = 0; i < TERRAIN_HEIGHT; i++) {
-
-			for (int j = landerLeft; j <= landerRight; j++) {
+			for (int j = landerLeft - 1; j <= landerRight + 1; j++) {
 				if (tiles[i][j] == MOON_GROUND) { 
 					int tileX = j;
 					int tileY = i + position.y;
 					int predictedBottom = landerBottom + landerVerticalSpeed*TIMESTEP;
 
-					if (tileY <= landerBottom + 1 || tileY <= predictedBottom - 6) {
+					if (tileX >= landerLeft && tileX <= landerRight && (tileY <= landerBottom || tileY <= predictedBottom - 6)) { //asd
 						return true;
 					}
+					if (tileX == landerLeft - 1 && tileY >= landerTop && tileY <= landerBottom - 2) return true;
+					else if (tileX == landerRight + 1 && tileY >= landerTop && tileY <= landerBottom - 2) return true;//
 				}
 			}
 		}
@@ -730,7 +730,7 @@ public:
 			cout << GameLevel::levels[i].difficulty << " - " << i + 1;
 		}
 		gotoxy(LANDER_SCREEN_X - 4, LANDER_SCREEN_Y + GameLevel::levels.size() + 3 - 5);
-		cout << "CREATE LEVEL - 9";
+		cout << "CREATE LEVEL - C";
 		gotoxy(LANDER_SCREEN_X - 4, LANDER_SCREEN_Y + GameLevel::levels.size() + 3 - 4);
 		cout << "EXIT - 0" << endl;
 	}
@@ -741,7 +741,7 @@ public:
 		while (true) {
 			if (_kbhit()) {
 				int key = _getch();
-				if (key == 57) {
+				if (key == 67 || key == 99) {
 					system("CLS");
 					createLevel();
 					system("CLS");
@@ -771,8 +771,6 @@ public:
 						system("CLS");
 						printLevelsItems();
 					}
-
-					printLevelsItems();
 				}
 				if (key == 48) exit(0);
 			}
@@ -815,9 +813,20 @@ public:
 				case 75: case 107:
 					system("CLS");
 					showcursor(false);
-					writeLevelToFile(createdLevel, "AdditionalLevels.txt");
-					GameLevel::levels.push_back(createdLevel);
-					createdLevel = GameLevel("DEFAULT_NAME", TERRAIN_WIDTH / 2, MAX_MAP_HEIGHT - 10, -0, 0, 8200);
+					if (GameLevel::levels.size() != 9) {
+						writeLevelToFile(createdLevel, "AdditionalLevels.txt");
+						GameLevel::levels.push_back(createdLevel);
+						createdLevel = GameLevel("DEFAULT_NAME", TERRAIN_WIDTH / 2, MAX_MAP_HEIGHT - 10, -0, 0, 8200);
+					}
+					else {
+						gotoxy(LANDER_SCREEN_X - 5, LANDER_SCREEN_Y);
+						cout << "All slots are full.";
+						Sleep(1500);
+						for (int i = 0; i < 10; i++) {
+							gotoxy(LANDER_SCREEN_X - 5, LANDER_SCREEN_Y);
+							cout << ' ';
+						}
+					}
 					break;
 				case 49:
 					for (int i = 0; i < 10; i++) {
@@ -890,7 +899,7 @@ public:
 	friend static void showLevelInfo(GameLevel& level, int x, int y) {
 		gotoxy(x, y);
 		cout << "Fuel: " << int((level.fuelMass / 8200) * 100) << " %" << "; Altitude: " << MAX_MAP_HEIGHT - level.posY - 3 << " m; ";
-		cout << "Vx: " << level.velX << " m/s; " << "Vy: " << level.velY << " m/s." << endl;
+		cout << "Vx: " << level.velX << " m/s; " << "Vy: " << -level.velY << " m/s." << endl;
 	}
 
 	friend static void showLevelTrajectory(GameLevel& level, int x, int y) {
@@ -1070,7 +1079,7 @@ public:
 		this->velX = newVelX;
 	}
 	void changeVelY(int newVelY) {
-		this->velY = newVelY;
+		this->velY = -newVelY;
 	}
 	void changeFuel(int percent) {
 		if (percent <= 0 || percent > 100) return;
@@ -1107,7 +1116,7 @@ vector<GameLevel> GameLevel::levels = {
 
 int main() {
 	srand(time(NULL));
-	showcursor(false);
+	showcursor(false); 
 	vector<GameLevel> levels = readLevelsFromFile("AdditionalLevels.txt");
 	GameLevel::addToLevels(levels);
 
@@ -1118,5 +1127,6 @@ int main() {
 		GameLevel::GameState result = level.run();
 		GameLevel::showEndMenu(result);
 	}
+
 	return 0;
 }
