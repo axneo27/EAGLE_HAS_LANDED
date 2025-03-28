@@ -775,11 +775,10 @@ public:
 		trajectory.print();
 	}
 
-	bool handleInput(Lander& lander) {
+	void handleInput(Lander& lander) {
 		if (_kbhit()) {
 			int key = _getch();
 			switch (key) {
-			case 27: return true; // pause
 			case 119: case 87: // 'w'
 				lander.changeThrust(lander.getEngine().percentThrust + 5);
 				break;
@@ -812,7 +811,6 @@ public:
 		else {
 			lander.turnRCSOff();
 		}
-		return false;
 	}
 
 	GameState run() {
@@ -854,8 +852,6 @@ public:
 
 			terrain.updateConsolePosition(lander);
 			lander.update(isCollided);
-
-			if (handleInput(lander)) showPauseMenu(lander);
 			Sleep(1);
 		}
 	}
@@ -881,33 +877,6 @@ public:
 				switch (key) {
 				case 49: return; // restart
 				case 50: exit(0);
-				}
-			}
-			Sleep(50);
-		}
-	}
-
-	void showPauseMenu(Lander& lander) {
-		system("CLS");
-		gotoxy(LANDER_SCREEN_X - 8, LANDER_SCREEN_Y);
-		cout << "GAME PAUSED";
-		gotoxy(LANDER_SCREEN_X - 10, LANDER_SCREEN_Y + 2);
-		cout << "1. Continue";
-		gotoxy(LANDER_SCREEN_X - 10, LANDER_SCREEN_Y + 3);
-		cout << "2. End Level";
-		gotoxy(LANDER_SCREEN_X - 10, LANDER_SCREEN_Y + 4);
-		cout << "3. Exit";
-
-		while (true) {
-			if (_kbhit()) {
-				int key = _getch();
-				switch (key) {
-				case 49: system("CLS"); return;
-				case 50: 
-					showMainMenu();
-					lander = Lander(posX, posY, velX, velY, fuelMass);
-					return;
-				case 51: exit(0);
 				}
 			}
 			Sleep(50);
