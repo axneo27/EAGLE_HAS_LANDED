@@ -757,7 +757,7 @@ public:
 		gotoxy(3, 5);
 		cout << "-------------------------------";
 		gotoxy(3, 6);
-		cout << "A - left RCS ON. D - right RSC ON";
+		cout << "A - right RCS ON. D - left RSC ON";
 		gotoxy(3, 7);
 		cout << "-------------------------------";
 		gotoxy(3, 8);
