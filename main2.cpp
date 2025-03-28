@@ -20,10 +20,10 @@ using namespace std;
 
 #define MOON_GROUND '~'
 #define TERRAIN_WIDTH 3500
-#define TERRAIN_HEIGHT 4
+#define TERRAIN_HEIGHT 3
 #define MAX_MAP_HEIGHT 2000
 
-#define TIMESTEP 0.08
+#define TIMESTEP 0.06
 
 int WIDTH = 120;
 int HEIGHT = 30;
@@ -128,11 +128,11 @@ public:
 			cout << endl;
 		}
 	}
-	void printLM(int x, int y, int angle, bool isThrustOn) {
+	void printLM(int x, int y, int angle, bool isThrustOn, bool hasFuel) {
 		for (int i = 0; i < height; i++) {
 			gotoxy(x, y + i);
 			for (int j = 0; j < width; j++) {
-				if (isThrustOn) {
+				if (isThrustOn && hasFuel) {
 					switch (angle) {
 					case 0:
 						if (i == 2 && j == 2) {
@@ -362,6 +362,7 @@ public:
 		}
 		engine.changeThrust(percent);
 		if (angle == 0) {
+			if (fuelMass != 0)
 			currentBlueprint.blueprint[2][2] = engine.thrustIndicator;
 		}
 		else if (angle == 90) {
@@ -444,7 +445,7 @@ public:
 	}
 
 	void print() {
-		currentBlueprint.printLM(LANDER_SCREEN_X, LANDER_SCREEN_Y, this->angle, engine.percentThrust == 0 ? false : true);
+		currentBlueprint.printLM(LANDER_SCREEN_X, LANDER_SCREEN_Y, this->angle, engine.percentThrust == 0 ? false : true, fuelMass == 0 ? false : true);
 	}
 
 	double getIsp() const {
@@ -497,7 +498,7 @@ public:
 	Point relativePosition;
 	MoonTerrain() {
 		position.x = 0;
-		position.y = MAX_MAP_HEIGHT - TERRAIN_HEIGHT;
+		position.y = MAX_MAP_HEIGHT - TERRAIN_HEIGHT + 1;
 
 		tiles.resize(TERRAIN_HEIGHT, vector<char>(TERRAIN_WIDTH, ' '));
 
@@ -535,12 +536,13 @@ public:
 			for (int j = landerLeft - 1; j <= landerRight + 1; j++) {
 				if (tiles[i][j] == MOON_GROUND) { 
 					int tileX = j;
-					int tileY = i + position.y;
-					int predictedBottom = landerBottom + landerVerticalSpeed*TIMESTEP;
+					int tileY = position.y + i;
+					int predictedBottom = landerBottom + landerVerticalSpeed*TIMESTEP*1.8;
 
-					if (tileX >= landerLeft && tileX <= landerRight && (tileY <= landerBottom || tileY <= predictedBottom - 6)) { //asd
+					if (tileX >= landerLeft && tileX <= landerRight && (tileY <= landerBottom - 1 || tileY <= predictedBottom)) { //asd
 						return true;
 					}
+
 					if (tileX == landerLeft - 1 && tileY >= landerTop && tileY <= landerBottom - 2) return true;
 					else if (tileX == landerRight + 1 && tileY >= landerTop && tileY <= landerBottom - 2) return true;//
 				}
@@ -553,7 +555,7 @@ public:
 		for (int i = 0; i < TERRAIN_HEIGHT; i++) {
 			if (!isValidY(i + consolePosition.y)) continue;
 			gotoxy(0, i + consolePosition.y);
-			for (int j = int(- relativePosition.x); j < int(-relativePosition.x) + WIDTH; j++) {
+			for (int j = int(-relativePosition.x); j < int(-relativePosition.x) + WIDTH; j++) {
 				cout << tiles[i][j];
 			}
 		}
@@ -564,7 +566,7 @@ public:
 			if (!isValidY(i + consolePosition.y)) continue;
 			gotoxy(0, i + consolePosition.y);
 			for (int j = int(-relativePosition.x); j < int(-relativePosition.x) + WIDTH; j++) {
-				cout << " ";
+				cout << ' ';
 			}
 		}
 	}
@@ -722,6 +724,53 @@ public:
 	GameLevel(string dif, int x, int y, int vx, int vy, double fm) : difficulty(dif), posX(x), posY(y), velX(vx), velY(vy), fuelMass(fm) {}
 	GameLevel() : GameLevel("EASY", TERRAIN_WIDTH / 2, MAX_MAP_HEIGHT - 20, 0, 0, 1000) {}
 
+	static void printInstruction() {
+		gotoxy(LANDER_SCREEN_X - 20, LANDER_SCREEN_Y - 10);
+		cout << "Instruction. Press ESC to return to the main menu.";
+		Blueprint angle0 = Blueprint::LMblueprints[0];
+		Blueprint angle_90 = Blueprint::LMblueprints[1];
+		Blueprint angle90 = Blueprint::LMblueprints[2];
+
+		angle0.blueprint[0][0] = '<';
+		angle0.blueprint[0][4] = '>';
+		angle0.blueprint[2][2] = 'W';
+		angle0.printLM(LANDER_SCREEN_X, LANDER_SCREEN_Y, 0, true, true);
+		gotoxy(LANDER_SCREEN_X - 2, LANDER_SCREEN_Y - 1); cout << "RCS";
+		gotoxy(LANDER_SCREEN_X + 4, LANDER_SCREEN_Y - 1); cout << "RCS";
+		gotoxy(LANDER_SCREEN_X + 2, LANDER_SCREEN_Y + 3); cout << "^";
+
+		gotoxy(LANDER_SCREEN_X - 3, LANDER_SCREEN_Y + 4); cout << "ENGINE GAS";
+
+		angle_90.blueprint[1][4] = '>';
+		angle_90.printLM(LANDER_SCREEN_X - 15, LANDER_SCREEN_Y, 90, true, true);
+
+		angle90.blueprint[1][0] = '<';
+		angle90.printLM(LANDER_SCREEN_X + 15, LANDER_SCREEN_Y, -90, true, true);
+		
+		gotoxy(3, 2);
+		cout << "-------------------------------";
+		gotoxy(3, 3);
+		cout << "W - increase thrust. S - decrease thrust.";
+		gotoxy(3, 4);
+		cout << "Z - 100% thrust. X - 0% thrust.";
+		gotoxy(3, 5);
+		cout << "-------------------------------";
+		gotoxy(3, 6);
+		cout << "A - left RCS ON. D - right RSC ON";
+		gotoxy(3, 7);
+		cout << "-------------------------------";
+		gotoxy(3, 8);
+		cout << "Q - rotate nozzle left. E - rotate nozzle right";
+
+		while (true) {
+			if (_kbhit()) {
+				showcursor(true);
+				int key = _getch();
+				if (key == 27) return;
+			}
+		}
+	}
+
 	static void printLevelsItems() {
 		gotoxy(LANDER_SCREEN_X - 5, LANDER_SCREEN_Y - 5);
 		cout << "SELECT LEVEL";
@@ -730,8 +779,10 @@ public:
 			cout << GameLevel::levels[i].difficulty << " - " << i + 1;
 		}
 		gotoxy(LANDER_SCREEN_X - 4, LANDER_SCREEN_Y + GameLevel::levels.size() + 3 - 5);
-		cout << "CREATE LEVEL - C";
+		cout << "INSTRUCTION - I";
 		gotoxy(LANDER_SCREEN_X - 4, LANDER_SCREEN_Y + GameLevel::levels.size() + 3 - 4);
+		cout << "CREATE LEVEL - C";
+		gotoxy(LANDER_SCREEN_X - 4, LANDER_SCREEN_Y + GameLevel::levels.size() + 3 - 3);
 		cout << "EXIT - 0" << endl;
 	}
 
@@ -741,10 +792,18 @@ public:
 		while (true) {
 			if (_kbhit()) {
 				int key = _getch();
-				if (key == 67 || key == 99) {
+				switch (key) {
+				case 67: case 99:
 					system("CLS");
 					createLevel();
 					system("CLS");
+					printLevelsItems();
+					break;
+				case 73: case 105:
+					system("CLS");
+					printInstruction();
+					system("CLS");
+					showcursor(false);
 					printLevelsItems();
 				}
 				for (int i = 0; i < GameLevel::levels.size(); i++) {
@@ -958,19 +1017,19 @@ public:
 		while (true) {
 			if (lander.position.x <= 1 || lander.position.x >= TERRAIN_WIDTH - 1 ||
 				lander.position.y <= 1) {
-				gotoxy(LANDER_SCREEN_X, LANDER_SCREEN_Y - 10);
+				gotoxy(LANDER_SCREEN_X - 5, LANDER_SCREEN_Y - 10);
 				cout << "You went out of the map bounds" << endl;
 				Sleep(2000);
 				return OUT_OF_BOUNDS;
 			}
 			if (lander.crashed) { 
-				gotoxy(LANDER_SCREEN_X, LANDER_SCREEN_Y - 5);
+				gotoxy(LANDER_SCREEN_X - 5, LANDER_SCREEN_Y - 5);
 				cout << "CRASH!" << endl;
 				Sleep(2000);
 				return CRASHED;
 			}
 			if (lander.landed) {
-				gotoxy(LANDER_SCREEN_X, LANDER_SCREEN_Y - 5);
+				gotoxy(LANDER_SCREEN_X - 5, LANDER_SCREEN_Y - 5);
 				cout << "Landed successfully!" << endl;
 				Sleep(2000);
 				return LANDED;
