@@ -537,9 +537,9 @@ public:
 				if (tiles[i][j] == MOON_GROUND) { 
 					int tileX = j;
 					int tileY = position.y + i;
-					int predictedBottom = landerBottom + landerVerticalSpeed*TIMESTEP*8.8;
+					int predictedBottom = landerBottom + landerVerticalSpeed*TIMESTEP*2.8;
 
-					if (tileX >= landerLeft && tileX <= landerRight && (tileY <= landerBottom - 2 || tileY <= predictedBottom - 1)) { //asd
+					if (tileX >= landerLeft && tileX <= landerRight && (tileY <= landerBottom - 1 || tileY <= predictedBottom - 6)) { //asd
 						return true;
 					}
 
